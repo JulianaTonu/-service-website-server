@@ -19,6 +19,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
 try{
     const serviceCollection = client.db("smileSeekersDb").collection("services");
+    const reviewCollection = client.db("smileSeekersDb").collection("reviews");
+
 
     //create service
     app.post('/services',async(req,res)=>{
