@@ -22,7 +22,12 @@ try{
     const serviceCollection = client.db("smileSeekersDb").collection("services");
     const reviewCollection = client.db("smileSeekersDb").collection("reviews");
 
+//jwt token
 
+app.post('/jwt',(req,res)=>{
+    const user=req.body;
+    res.send(user);
+})
     //create service
     app.post('/services',async(req,res)=>{
         const service=req.body;
