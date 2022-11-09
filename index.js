@@ -30,6 +30,14 @@ try{
         res.send(result)
     })
 
+    //create review
+    app.post('/reviews',async(req,res)=>{
+        const review=req.body;
+        console.log(review)
+        const result =await reviewCollection.insertOne(review)
+        res.send(result)
+    })
+
     //read all services
    app.get('/services', async(req,res)=>{
     const query ={}
