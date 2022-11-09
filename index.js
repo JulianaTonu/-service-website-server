@@ -37,6 +37,13 @@ try{
         const result =await reviewCollection.insertOne(review)
         res.send(result)
     })
+     //read all reviews
+   app.get('/reviews', async(req,res)=>{
+    const query ={}
+    const cursor =reviewCollection.find(query)
+    const reviews =await cursor.toArray()
+    res.send(reviews)
+})
 
     //read all services
    app.get('/services', async(req,res)=>{
