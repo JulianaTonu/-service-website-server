@@ -26,7 +26,8 @@ try{
 
 app.post('/jwt',(req,res)=>{
     const user=req.body;
-    res.send(user);
+    const token =jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'10h'})
+    res.send({token});
 })
     //create service
     app.post('/services',async(req,res)=>{
