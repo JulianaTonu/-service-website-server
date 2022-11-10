@@ -42,7 +42,7 @@ try{
 
 app.post('/jwt',(req,res)=>{
     const user=req.body;
-    const token =jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'10h'})
+    const token =jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'30h'})
     res.send({token});
 })
     //create service
@@ -74,14 +74,14 @@ app.get('/review/:id', async(req, res)=>{
     const review =await reviewCollection.findOne(query)
     res.send(review);
 })
+// verifyJWT,
+app.get('/reviews', async(req,res)=>{
 
-app.get('/reviews',verifyJWT, async(req,res)=>{
-
-    const decoded =req.decoded;
-    console.log('inside reviews api' , decoded)
-    if(decoded.email !== req.query.email){
-        res.status(401).send({message: 'unauthorized access'})
-    }
+    // const decoded =req.decoded;
+    // console.log('inside reviews api' , decoded)
+    // if(decoded.email !== req.query.email){
+    //     res.status(401).send({message: 'unauthorized access'})
+    // }
     let query={};
     // console.log(req.query)
     if(req.query.email ){
@@ -107,7 +107,8 @@ app.get('/reviews/service', async(req,res)=>{
             servicename:req.query.servicename
         }
     }
-    const cursor=  reviewCollection.find(query)
+    // sort({mydate:-1})
+    const cursor=  reviewCollection.find(query).sort({mydate:-1})
     const reviews =await cursor.toArray()
     res.send(reviews)
 
@@ -133,6 +134,31 @@ app.get('/services/:id', async(req, res)=>{
     const query ={_id:ObjectId(id)};
     const service =await serviceCollection.findOne(query)
     res.send(service);
+})
+
+// update review
+app.get('/reviewss/:id',async(req,res)=>{
+    const id =req.params.id;
+    const query ={_id:ObjectId(id)}
+    const review =await reviewCollection.findOne(query)
+    res.send(review)
+})
+
+app.put('/reviewss/:id',async(req,res)=>{
+    const id =req.params.id;
+    const filter ={_id:ObjectId(id)}
+    const review =req.body
+    const option={upsert:true};
+
+    const updatedReview={
+        $set:{
+            email:review.email ,      
+            mydate:review.mydate ,        
+            message:review.upmessage 
+        }
+    }
+    const result =await reviewCollection.updateOne(filter,updatedReview,option)
+    res.send(result)
 })
 
 //delete reviews
