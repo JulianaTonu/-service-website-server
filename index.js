@@ -17,18 +17,19 @@ console.log('password',process.env.DB_PASSWORD)
 const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.rpina.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-function verifyJWT(req,res,next){
+//jwt
+function verifyJWT(req, res, next){
     // console.log(req.headers.authorization)
     const authHeader =req.headers.authorization;
     if(!authHeader){
       return res.status(401).send({message:'unauthorized access'})
     }
-const token =authHeader.split('')[1]
+const token =authHeader.split(' ')[1];
 jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
 if(err){
-    return res.status(401).send({message: 'unauthorized access'})
+    return res.status(403).send({message: 'unauthorized access'})
 }
-req.decoded =decoded;
+req.decoded = decoded;
 next();
     })
 }
@@ -39,11 +40,11 @@ try{
     const reviewCollection = client.db("smileSeekersDb").collection("reviews");
 
 //jwt token
-
 app.post('/jwt',(req,res)=>{
     const user=req.body;
-    const token =jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'30h'})
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{expiresIn:'20 days'})
     res.send({token});
+    
 })
     //create service
     app.post('/services',async(req,res)=>{
@@ -74,16 +75,16 @@ app.get('/review/:id', async(req, res)=>{
     const review =await reviewCollection.findOne(query)
     res.send(review);
 })
-// verifyJWT,
-app.get('/reviews', async(req,res)=>{
 
-    // const decoded =req.decoded;
-    // console.log('inside reviews api' , decoded)
-    // if(decoded.email !== req.query.email){
-    //     res.status(401).send({message: 'unauthorized access'})
-    // }
+app.get('/reviews',verifyJWT, async(req,res)=>{
+
+    const decoded =req.decoded;
+    console.log('inside reviews api' , decoded)
+    if(decoded.email !== req.query.email){
+        res.status(403).send({message: 'unauthorized access'})
+    }
     let query={};
-    // console.log(req.query)
+   
     if(req.query.email ){
         query={
             email:req.query.email,
